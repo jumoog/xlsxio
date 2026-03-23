@@ -164,6 +164,17 @@ DLL_EXPORT_XLSXIO void xlsxiowrite_add_cell_datetime (xlsxiowriter handle, time_
  */
 DLL_EXPORT_XLSXIO void xlsxiowrite_next_row (xlsxiowriter handle);
 
+/*! \brief finish the current sheet and start a new sheet
+ * \param  handle        write handle for .xlsx object
+ * \param  sheetname     name of the new worksheet
+ * Finishes writing the current sheet (including flushing buffered rows)
+ * and starts a new sheet. Column definitions and detection rows are reset
+ * for the new sheet.
+ * \sa     xlsxiowrite_open()
+ * \sa     xlsxiowrite_add_column()
+ */
+DLL_EXPORT_XLSXIO void xlsxiowrite_next_sheet (xlsxiowriter handle, const char* sheetname);
+
 #ifdef __cplusplus
 }
 #endif

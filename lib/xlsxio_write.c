@@ -115,37 +115,10 @@ DLL_EXPORT_XLSXIO const char* xlsxiowrite_get_version_string ()
 #define XML_FILENAME_XL_STYLES          "styles.xml"
 #define XML_FILENAME_XL_THEME1          "theme1.xml"
 #define XML_FILENAME_XL_SHAREDSTRINGS   "sharedStrings.xml"
-#define XML_FILENAME_XL_WORKSHEET1      "sheet1.xml"
 #define XML_SHEETNAME_MAXLEN            31
 #define XML_RELID_DOCPROPS_CORE             "rId2"
 #define XML_RELID_DOCPROPS_APP              "rId3"
 #define XML_RELID_XL_WORKBOOK               "rId1"
-#define XML_WORKBOOK_RELID_XL_STYLES        "rId1"
-#define XML_WORKBOOK_RELID_XL_WORKSHEET1    "rId2"
-#define XML_WORKBOOK_RELID_XL_SHAREDSTRINGS "rId3"
-#define XML_WORKBOOK_RELID_XL_THEME1        "rId4"
-
-const char* content_types_xml =
-  XML_HEADER
-  "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">" OPTIONAL_LINE_BREAK
-  "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" OPTIONAL_LINE_BREAK
-  "<Default Extension=\"xml\" ContentType=\"application/xml\"/>" OPTIONAL_LINE_BREAK
-  "<Override PartName=\"/" XML_FOLDER_RELS XML_FILENAME_RELS "\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" OPTIONAL_LINE_BREAK
-  "<Override PartName=\"/" XML_FOLDER_XL XML_FILENAME_XL_WORKBOOK "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/>" OPTIONAL_LINE_BREAK
-  "<Override PartName=\"/" XML_FOLDER_DOCPROPS XML_FILENAME_DOCPROPS_CORE "\" ContentType=\"application/vnd.openxmlformats-package.core-properties+xml\"/>" OPTIONAL_LINE_BREAK
-  "<Override PartName=\"/" XML_FOLDER_DOCPROPS XML_FILENAME_DOCPROPS_APP "\" ContentType=\"application/vnd.openxmlformats-officedocument.extended-properties+xml\"/>" OPTIONAL_LINE_BREAK
-#ifndef WITHOUT_XLSX_STYLES
-  "<Override PartName=\"/" XML_FOLDER_XL XML_FILENAME_XL_STYLES "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/>" OPTIONAL_LINE_BREAK
-#endif
-#ifndef WITHOUT_XLSX_THEMES
-  "<Override PartName=\"/" XML_FOLDER_XL XML_FOLDER_THEMES XML_FILENAME_XL_THEME1 "\" ContentType=\"application/vnd.openxmlformats-officedocument.theme+xml\"/>" OPTIONAL_LINE_BREAK
-#endif
-  "<Override PartName=\"/" XML_FOLDER_XL XML_FOLDER_RELS XML_FILENAME_XL_WORKBOOK_RELS "\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" OPTIONAL_LINE_BREAK
-  "<Override PartName=\"/" XML_FOLDER_XL XML_FOLDER_WORKSHEETS XML_FILENAME_XL_WORKSHEET1 "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" OPTIONAL_LINE_BREAK
-#ifndef WITHOUT_XLSX_SHAREDSTRINGS
-  "<Override PartName=\"/" XML_FOLDER_XL XML_FILENAME_XL_SHAREDSTRINGS "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml\"/>" OPTIONAL_LINE_BREAK
-#endif
-  "</Types>" OPTIONAL_LINE_BREAK;
 
 const char* docprops_core_xml =
   XML_HEADER
@@ -248,35 +221,6 @@ const char* sharedstrings_xml =
   //"<si><t></t></si>" OPTIONAL_LINE_BREAK
   //"</sst>" OPTIONAL_LINE_BREAK;
 #endif
-
-const char* workbook_rels_xml =
-  XML_HEADER
-  "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" OPTIONAL_LINE_BREAK
-#ifndef WITHOUT_XLSX_STYLES
-  "<Relationship Id=\"" XML_WORKBOOK_RELID_XL_STYLES "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"" XML_FILENAME_XL_STYLES "\"/>" OPTIONAL_LINE_BREAK
-#endif
-  "<Relationship Id=\"" XML_WORKBOOK_RELID_XL_WORKSHEET1 "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"" XML_FOLDER_WORKSHEETS XML_FILENAME_XL_WORKSHEET1 "\"/>" OPTIONAL_LINE_BREAK
-#ifndef WITHOUT_XLSX_SHAREDSTRINGS
-  "<Relationship Id=\"" XML_WORKBOOK_RELID_XL_SHAREDSTRINGS "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings\" Target=\"" XML_FILENAME_XL_SHAREDSTRINGS "\"/>" OPTIONAL_LINE_BREAK
-#endif
-#ifndef WITHOUT_XLSX_THEMES
-  "<Relationship Id=\"" XML_WORKBOOK_RELID_XL_THEME1 "\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme\" Target=\"" XML_FOLDER_THEMES XML_FILENAME_XL_THEME1 "\"/>" OPTIONAL_LINE_BREAK
-#endif
-  "</Relationships>" OPTIONAL_LINE_BREAK;
-
-const char* workbook_xml =
-  XML_HEADER
-  "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">" OPTIONAL_LINE_BREAK
-  //"<workbookPr/>" OPTIONAL_LINE_BREAK
-  "<bookViews>" OPTIONAL_LINE_BREAK
-  //"<workbookView/>" OPTIONAL_LINE_BREAK
-  "<workbookView activeTab=\"0\"/>" OPTIONAL_LINE_BREAK
-  //"<workbookView activeTab=\"0\" xWindow=\"0\" yWindow=\"0\"/>" OPTIONAL_LINE_BREAK
-  "</bookViews>" OPTIONAL_LINE_BREAK
-  "<sheets>" OPTIONAL_LINE_BREAK
-  "<sheet name=\"%s\" sheetId=\"1\" r:id=\"" XML_WORKBOOK_RELID_XL_WORKSHEET1 "\"/>" OPTIONAL_LINE_BREAK
-  "</sheets>" OPTIONAL_LINE_BREAK
-  "</workbook>" OPTIONAL_LINE_BREAK;
 
 const char* worksheet_xml_begin =
   XML_HEADER
@@ -579,6 +523,11 @@ struct column_info_struct {
   struct column_info_struct* next;
 };
 
+struct sheet_name_entry {
+  char* name;
+  struct sheet_name_entry* next;
+};
+
 struct xlsxio_write_struct {
   char* filename;
   char* sheetname;
@@ -599,6 +548,10 @@ struct xlsxio_write_struct {
   int freezetop;
   int sheetopen;
   int rowopen;
+  size_t sheetnr;
+  struct sheet_name_entry* sheetnames;
+  struct sheet_name_entry** psheetnames_last;
+  size_t default_rowstobuffer;
 #ifndef NO_ROW_NUMBERS
   uint64_t rownr;
 #ifndef NO_COLUMN_NUMBERS
@@ -623,8 +576,9 @@ void* thread_proc (void* arg)
 #endif
 {
   xlsxiowriter handle = (xlsxiowriter)arg;
-  //generate required files
-  zip_add_static_content_string(handle->zip, XML_FILENAME_CONTENTTYPES, content_types_xml);
+  size_t sheetnr = 0;
+
+  //generate non-sheet-dependent static files
   zip_add_static_content_string(handle->zip, XML_FOLDER_DOCPROPS XML_FILENAME_DOCPROPS_CORE, docprops_core_xml);
   zip_add_static_content_string(handle->zip, XML_FOLDER_DOCPROPS XML_FILENAME_DOCPROPS_APP, docprops_app_xml);
   zip_add_static_content_string(handle->zip, XML_FOLDER_RELS XML_FILENAME_RELS, rels_xml);
@@ -634,58 +588,173 @@ void* thread_proc (void* arg)
 #ifndef WITHOUT_XLSX_THEMES
   zip_add_static_content_string(handle->zip, XML_FOLDER_XL XML_FOLDER_THEMES XML_FILENAME_XL_THEME1, theme_xml);
 #endif
-  zip_add_static_content_string(handle->zip, XML_FOLDER_XL XML_FOLDER_RELS XML_FILENAME_XL_WORKBOOK_RELS, workbook_rels_xml);
-  { //TO DO: this crashes on Linux
-    char* sheetname = NULL;
-    if (handle->sheetname) {
-      sheetname = strdup(handle->sheetname);
-      if (sheetname) {
-        if (strlen(sheetname) > XML_SHEETNAME_MAXLEN)
-          sheetname[XML_SHEETNAME_MAXLEN] = 0;
-        fix_xml_special_chars(&sheetname);
-      }
-    }
-    zip_add_dynamic_content_string(handle->zip, XML_FOLDER_XL XML_FILENAME_XL_WORKBOOK, workbook_xml, (sheetname ? sheetname : "Sheet1"));
-    free(sheetname);
-  }
 #ifndef WITHOUT_XLSX_SHAREDSTRINGS
   zip_add_static_content_string(handle->zip, XML_FOLDER_XL XML_FILENAME_XL_SHAREDSTRINGS, sharedstrings_xml);
 #endif
 
-  //add sheet content file with pipe data
-#ifdef USE_MINIZIP
-#define MINIZIP_PIPE_BUFFER_SIZE 1024
-//#error TO DO:
-  if (zipOpenNewFileInZip(handle->zip, XML_FOLDER_XL XML_FOLDER_WORKSHEETS XML_FILENAME_XL_WORKSHEET1, NULL, NULL, 0, NULL, 0, NULL, Z_DEFLATED, 9) != ZIP_OK) {
-    fprintf(stderr, "Error adding file");
-  } else {
-    char* buf;
-    size_t buflen;
-    if ((buf = (char*)malloc(MINIZIP_PIPE_BUFFER_SIZE)) == NULL) {
-      fprintf(stderr, "Memory allocation error");/////
-    } else {
-      while ((buflen = fread(buf, 1, MINIZIP_PIPE_BUFFER_SIZE, handle->pipe_read)) > 0) {
-        if (zipWriteInFileInZip(handle->zip, buf, buflen) != ZIP_OK) {
-          fprintf(stderr, "Error writing file inside archive");/////
+  //read all pipe data into memory, split by NUL sentinels into sheets
+  {
+    char* alldata = NULL;
+    size_t alldata_len = 0;
+    size_t alldata_cap = 0;
+    char tmpbuf[4096];
+    size_t n;
+    while ((n = fread(tmpbuf, 1, sizeof(tmpbuf), handle->pipe_read)) > 0) {
+      if (alldata_len + n > alldata_cap) {
+        alldata_cap = (alldata_len + n) * 2;
+        if (alldata_cap < 8192)
+          alldata_cap = 8192;
+        alldata = (char*)realloc(alldata, alldata_cap);
+        if (!alldata) {
+          fprintf(stderr, "Memory allocation error\n");
           break;
         }
       }
-      free(buf);
+      memcpy(alldata + alldata_len, tmpbuf, n);
+      alldata_len += n;
     }
     fclose(handle->pipe_read);
-    zipCloseFileInZip(handle->zip);
-    zipClose(handle->zip, NULL);
+    //split by NUL sentinel and add each chunk as a sheet
+    if (alldata) {
+      size_t offset = 0;
+      while (offset <= alldata_len) {
+        //find next NUL sentinel or end of data
+        size_t end = offset;
+        while (end < alldata_len && alldata[end] != '\0')
+          end++;
+        size_t chunk_len = end - offset;
+        if (chunk_len > 0) {
+          char sheetpath[256];
+          sheetnr++;
+          snprintf(sheetpath, sizeof(sheetpath), XML_FOLDER_XL XML_FOLDER_WORKSHEETS "sheet%u.xml", (unsigned int)sheetnr);
+          zip_add_content_buffer(handle->zip, sheetpath, alldata + offset, chunk_len, 0);
+        }
+        //skip past the NUL sentinel
+        if (end < alldata_len)
+          offset = end + 1;
+        else
+          break; //reached end of data
+      }
+      free(alldata);
+    }
   }
-#else
-  zip_source_t* zipsrc = zip_source_filep(handle->zip, handle->pipe_read, 0, -1);
-  if (zip_file_add_custom(handle->zip, XML_FOLDER_XL XML_FOLDER_WORKSHEETS XML_FILENAME_XL_WORKSHEET1, zipsrc) < 0) {
-    zip_source_free(zipsrc);
-    fprintf(stderr, "Error adding file");
-  }
-#ifdef ZIP_RDONLY
-  zip_file_set_mtime(handle->zip, zip_get_num_entries(handle->zip, 0) - 1, time(NULL), 0);
+
+  //generate sheet-count-dependent files now that we know the total
+  handle->sheetnr = sheetnr;
+  {
+    //build dynamic content_types_xml
+    char* ct = NULL;
+    size_t ctlen = 0;
+    append_data(&ct, &ctlen, "%s",
+      XML_HEADER
+      "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">" OPTIONAL_LINE_BREAK
+      "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" OPTIONAL_LINE_BREAK
+      "<Default Extension=\"xml\" ContentType=\"application/xml\"/>" OPTIONAL_LINE_BREAK
+      "<Override PartName=\"/" XML_FOLDER_RELS XML_FILENAME_RELS "\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" OPTIONAL_LINE_BREAK
+      "<Override PartName=\"/" XML_FOLDER_XL XML_FILENAME_XL_WORKBOOK "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/>" OPTIONAL_LINE_BREAK
+      "<Override PartName=\"/" XML_FOLDER_DOCPROPS XML_FILENAME_DOCPROPS_CORE "\" ContentType=\"application/vnd.openxmlformats-package.core-properties+xml\"/>" OPTIONAL_LINE_BREAK
+      "<Override PartName=\"/" XML_FOLDER_DOCPROPS XML_FILENAME_DOCPROPS_APP "\" ContentType=\"application/vnd.openxmlformats-officedocument.extended-properties+xml\"/>" OPTIONAL_LINE_BREAK
+    );
+#ifndef WITHOUT_XLSX_STYLES
+    append_data(&ct, &ctlen, "<Override PartName=\"/" XML_FOLDER_XL XML_FILENAME_XL_STYLES "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/>" OPTIONAL_LINE_BREAK);
 #endif
-  //close zip file (processes all data, will block until pipe is closed)
+#ifndef WITHOUT_XLSX_THEMES
+    append_data(&ct, &ctlen, "<Override PartName=\"/" XML_FOLDER_XL XML_FOLDER_THEMES XML_FILENAME_XL_THEME1 "\" ContentType=\"application/vnd.openxmlformats-officedocument.theme+xml\"/>" OPTIONAL_LINE_BREAK);
+#endif
+    append_data(&ct, &ctlen, "<Override PartName=\"/" XML_FOLDER_XL XML_FOLDER_RELS XML_FILENAME_XL_WORKBOOK_RELS "\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" OPTIONAL_LINE_BREAK);
+    {
+      size_t i;
+      for (i = 1; i <= sheetnr; i++) {
+        append_data(&ct, &ctlen, "<Override PartName=\"/" XML_FOLDER_XL XML_FOLDER_WORKSHEETS "sheet%u.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" OPTIONAL_LINE_BREAK, (unsigned int)i);
+      }
+    }
+#ifndef WITHOUT_XLSX_SHAREDSTRINGS
+    append_data(&ct, &ctlen, "<Override PartName=\"/" XML_FOLDER_XL XML_FILENAME_XL_SHAREDSTRINGS "\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml\"/>" OPTIONAL_LINE_BREAK);
+#endif
+    append_data(&ct, &ctlen, "</Types>" OPTIONAL_LINE_BREAK);
+    zip_add_content_buffer(handle->zip, XML_FILENAME_CONTENTTYPES, ct, ctlen, 1);
+  }
+  {
+    //build dynamic workbook.xml.rels
+    char* rels = NULL;
+    size_t relslen = 0;
+    append_data(&rels, &relslen, "%s",
+      XML_HEADER
+      "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" OPTIONAL_LINE_BREAK
+    );
+#ifndef WITHOUT_XLSX_STYLES
+    append_data(&rels, &relslen, "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"" XML_FILENAME_XL_STYLES "\"/>" OPTIONAL_LINE_BREAK);
+#endif
+    {
+      size_t i;
+      for (i = 1; i <= sheetnr; i++) {
+        //sheet relationship IDs start at rId2
+        append_data(&rels, &relslen, "<Relationship Id=\"rId%u\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"" XML_FOLDER_WORKSHEETS "sheet%u.xml\"/>" OPTIONAL_LINE_BREAK, (unsigned int)(i + 1), (unsigned int)i);
+      }
+    }
+    {
+      unsigned int nextid = (unsigned int)(sheetnr + 2);
+#ifndef WITHOUT_XLSX_SHAREDSTRINGS
+      append_data(&rels, &relslen, "<Relationship Id=\"rId%u\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings\" Target=\"" XML_FILENAME_XL_SHAREDSTRINGS "\"/>" OPTIONAL_LINE_BREAK, nextid++);
+#endif
+#ifndef WITHOUT_XLSX_THEMES
+      append_data(&rels, &relslen, "<Relationship Id=\"rId%u\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme\" Target=\"" XML_FOLDER_THEMES XML_FILENAME_XL_THEME1 "\"/>" OPTIONAL_LINE_BREAK, nextid++);
+#endif
+      (void)nextid;
+    }
+    append_data(&rels, &relslen, "</Relationships>" OPTIONAL_LINE_BREAK);
+    zip_add_content_buffer(handle->zip, XML_FOLDER_XL XML_FOLDER_RELS XML_FILENAME_XL_WORKBOOK_RELS, rels, relslen, 1);
+  }
+  {
+    //build dynamic workbook.xml with all sheets
+    char* wb = NULL;
+    size_t wblen = 0;
+    append_data(&wb, &wblen, "%s",
+      XML_HEADER
+      "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">" OPTIONAL_LINE_BREAK
+      "<bookViews>" OPTIONAL_LINE_BREAK
+      "<workbookView activeTab=\"0\"/>" OPTIONAL_LINE_BREAK
+      "</bookViews>" OPTIONAL_LINE_BREAK
+      "<sheets>" OPTIONAL_LINE_BREAK
+    );
+    {
+      struct sheet_name_entry* entry = handle->sheetnames;
+      size_t i = 0;
+      while (entry) {
+        i++;
+        char* sheetname = NULL;
+        if (entry->name) {
+          sheetname = strdup(entry->name);
+          if (sheetname) {
+            if (strlen(sheetname) > XML_SHEETNAME_MAXLEN)
+              sheetname[XML_SHEETNAME_MAXLEN] = 0;
+            fix_xml_special_chars(&sheetname);
+          }
+        }
+        append_data(&wb, &wblen, "<sheet name=\"%s\" sheetId=\"%u\" r:id=\"rId%u\"/>" OPTIONAL_LINE_BREAK,
+          (sheetname ? sheetname : "Sheet1"),
+          (unsigned int)i,
+          (unsigned int)(i + 1));
+        free(sheetname);
+        entry = entry->next;
+      }
+    }
+    append_data(&wb, &wblen, "</sheets>" OPTIONAL_LINE_BREAK "</workbook>" OPTIONAL_LINE_BREAK);
+    zip_add_content_buffer(handle->zip, XML_FOLDER_XL XML_FILENAME_XL_WORKBOOK, wb, wblen, 1);
+  }
+
+  //close zip
+#ifdef USE_MINIZIP
+  zipClose(handle->zip, NULL);
+#else
+#ifdef ZIP_RDONLY
+  {
+    size_t i;
+    for (i = 0; i < (size_t)zip_get_num_entries(handle->zip, 0); i++) {
+      zip_file_set_mtime(handle->zip, i, time(NULL), 0);
+    }
+  }
+#endif
   if (zip_close(handle->zip) != 0) {
     int ze, se;
 #ifdef ZIP_RDONLY
@@ -732,12 +801,26 @@ DLL_EXPORT_XLSXIO xlsxiowriter xlsxiowrite_open (const char* filename, const cha
     handle->freezetop = 0;
     handle->sheetopen = 0;
     handle->rowopen = 0;
+    handle->sheetnr = 1;
+    handle->sheetnames = NULL;
+    handle->psheetnames_last = &handle->sheetnames;
+    handle->default_rowstobuffer = DEFAULT_BUFFERED_ROWS;
 #ifndef NO_ROW_NUMBERS
     handle->rownr = 0;
 #ifndef NO_COLUMN_NUMBERS
     handle->colnr = 0;
 #endif
 #endif
+    //record first sheet name
+    {
+      struct sheet_name_entry* entry = (struct sheet_name_entry*)malloc(sizeof(struct sheet_name_entry));
+      if (entry) {
+        entry->name = (sheetname ? strdup(sheetname) : strdup("Sheet1"));
+        entry->next = NULL;
+        *handle->psheetnames_last = entry;
+        handle->psheetnames_last = &entry->next;
+      }
+    }
     //remove filename first if it already exists
     unlink(filename);
     //initialize zip file object
@@ -791,6 +874,8 @@ DLL_EXPORT_XLSXIO int xlsxiowrite_close (xlsxiowriter handle)
 {
   struct column_info_struct* colinfo;
   struct column_info_struct* colinfonext;
+  struct sheet_name_entry* sheetentry;
+  struct sheet_name_entry* sheetentrynext;
   if (!handle)
     return -1;
   //finalize data
@@ -803,7 +888,7 @@ DLL_EXPORT_XLSXIO int xlsxiowrite_close (xlsxiowriter handle)
       fprintf(handle->pipe_write, "</row>" OPTIONAL_LINE_BREAK);
     //write worksheet data
     fprintf(handle->pipe_write, "%s", worksheet_xml_end);
-    //close pipe
+    //close pipe (no sentinel after last sheet - EOF signals end)
     fclose(handle->pipe_write);
   }
   //wait for thread to finish
@@ -818,6 +903,13 @@ DLL_EXPORT_XLSXIO int xlsxiowrite_close (xlsxiowriter handle)
     colinfonext = colinfo->next;
     free(colinfo);
     colinfo = colinfonext;
+  }
+  sheetentry = handle->sheetnames;
+  while (sheetentry) {
+    sheetentrynext = sheetentry->next;
+    free(sheetentry->name);
+    free(sheetentry);
+    sheetentry = sheetentrynext;
   }
   free(handle->filename);
   free(handle->sheetname);
@@ -1002,6 +1094,7 @@ DLL_EXPORT_XLSXIO void xlsxiowrite_set_detection_rows (xlsxiowriter handle, size
     return;
   //set number of rows to buffer
   handle->rowstobuffer = rows;
+  handle->default_rowstobuffer = rows;
   //flush when zero was specified
   if (!rows)
     flush_buffer(handle);
@@ -1096,5 +1189,74 @@ DLL_EXPORT_XLSXIO void xlsxiowrite_next_row (xlsxiowriter handle)
     append_data(&handle->buf, &handle->buflen, "</row>" OPTIONAL_LINE_BREAK);
   handle->rowopen = 0;
   handle->pcurrentcolumn = &handle->columninfo;
+}
+
+DLL_EXPORT_XLSXIO void xlsxiowrite_next_sheet (xlsxiowriter handle, const char* sheetname)
+{
+  struct column_info_struct* colinfo;
+  struct column_info_struct* colinfonext;
+  if (!handle || !handle->pipe_write)
+    return;
+  //flush buffer if still buffering
+  if (!handle->sheetopen)
+    flush_buffer(handle);
+  //close current row if needed
+  if (handle->rowopen)
+    fprintf(handle->pipe_write, "</row>" OPTIONAL_LINE_BREAK);
+  //write worksheet end
+  fprintf(handle->pipe_write, "%s", worksheet_xml_end);
+  //flush the pipe to ensure all data is sent
+  fflush(handle->pipe_write);
+  //write NUL sentinel byte to signal end of sheet to thread
+  fputc('\0', handle->pipe_write);
+  fflush(handle->pipe_write);
+  //free column info from previous sheet
+  colinfo = handle->columninfo;
+  while (colinfo) {
+    colinfonext = colinfo->next;
+    free(colinfo);
+    colinfo = colinfonext;
+  }
+  //reset state for new sheet
+  handle->columninfo = NULL;
+  handle->pcurrentcolumn = &handle->columninfo;
+  if (handle->buf) {
+    free(handle->buf);
+    handle->buf = NULL;
+  }
+  handle->buflen = 0;
+  handle->rowstobuffer = handle->default_rowstobuffer;
+  handle->rowheight = 0;
+  handle->freezetop = 0;
+  handle->sheetopen = 0;
+  handle->rowopen = 0;
+  handle->sheetnr++;
+#ifndef NO_ROW_NUMBERS
+  handle->rownr = 0;
+#ifndef NO_COLUMN_NUMBERS
+  handle->colnr = 0;
+#endif
+#endif
+  //record new sheet name
+  {
+    struct sheet_name_entry* entry = (struct sheet_name_entry*)malloc(sizeof(struct sheet_name_entry));
+    if (entry) {
+      if (sheetname)
+        entry->name = strdup(sheetname);
+      else {
+        char defaultname[32];
+        snprintf(defaultname, sizeof(defaultname), "Sheet%u", (unsigned int)handle->sheetnr);
+        entry->name = strdup(defaultname);
+      }
+      entry->next = NULL;
+      *handle->psheetnames_last = entry;
+      handle->psheetnames_last = &entry->next;
+    }
+  }
+  //update current sheet name
+  free(handle->sheetname);
+  handle->sheetname = (sheetname ? strdup(sheetname) : NULL);
+  //write initial worksheet data for the new sheet
+  fprintf(handle->pipe_write, "%s", worksheet_xml_begin);
 }
 
